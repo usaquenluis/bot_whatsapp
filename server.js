@@ -37,20 +37,10 @@ let config = {
 app.use(bodyParser.json());
 app.use(cors());
 app.use(cookieParser());
-app.use(express.static('public')); // Sirve archivos estáticos (CSS, JS, Imágenes si las hubiera)
+
 
 // --- RUTAS DE AUTENTICACIÓN ---
 
-// Ruta raíz: Verifica si estás logueado
-app.get('/', (req, res) => {
-    if (req.cookies[COOKIE_NAME] === PASSWORD_APP) {
-        // Si tiene la cookie correcta, muestra la App
-        res.sendFile(path.join(__dirname, 'public', 'app.html'));
-    } else {
-        // Si no, muestra el Login
-        res.sendFile(path.join(__dirname, 'public', 'login.html'));
-    }
-});
 
 // Ruta para procesar el login
 app.post('/do-login', (req, res) => {
