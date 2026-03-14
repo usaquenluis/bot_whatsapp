@@ -30,7 +30,7 @@ let botFlow = [
 let config = {
     token: '',
     phoneId: '',
-    verifyToken: 'MI_TOKEN_SECRETO_2024' // Token de verificación de Meta
+    verifyToken: 'EAAaf9V8OmS4BQ7eGIFzlXF9GfwDZAeatjm6kXUW9W1olT4TuSsBMtHwRlg2cHevRvJzl8ZB1LtKebYi1500JyZBlIZBC8Eby9dTBAsw6nhoArSZAyp8eMqkf39nwNCJpAAS7f6uZB2355YPUtt4l8EjPXm2RsQSJ2NsXYHaFcoDaWj5Ou7GZC8lWSZBlUsZBZAoHkAACScULGk1npxXuZCMdCnKZBFgjA9FEZCZAiNjitGJUjDHVLdBRTkJhXV72hxG6ijQnRPTvJf0aS8TxTZCGt8ZAQXgMMQZDZD' // Token de verificación de Meta
 };
 
 // MIDDLEWARES
