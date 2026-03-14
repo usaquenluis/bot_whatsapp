@@ -20,12 +20,20 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 // --- BASE DE DATOS EN MEMORIA ---
 let contactsDB = [];
-let botFlow = [
-    { id: 1, type: 'reply', content: '¡Hola! Gracias por escribirnos.' },
-    { id: 2, type: 'tag', content: 'Cliente Nuevo' },
-    { id: 3, type: 'delay', content: 1 },
-    { id: 4, type: 'reply', content: '¿En qué podemos ayudarte?' }
-];
+// CAMBIA esto por lo siguiente:
+let botFlows = {
+    "default": [ // Este es el flujo que se ejecuta si no entiende la palabra
+        { id: 1, type: 'reply', content: 'No entendí tu mensaje. ¿Puedes ser más específico?' }
+    ],
+    "hola": [   // Si el cliente escribe "hola", va esto
+        { id: 1, type: 'reply', content: '¡Hola! Bienvenido a nuestra tienda.' },
+        { id: 2, type: 'reply', content: 'Escribe PRECIO para ver las tarifas.' }
+    ],
+    "precio": [ // Si escribe "precio", va esto
+        { id: 1, type: 'reply', content: 'Nuestro plan básico cuesta $10/mes.' },
+        { id: 2, type: 'reply', content: '¿Te interesa?' }
+    ]
+};
 
 let config = {
     token: 'EAAaf9V8OmS4BQ7eGIFzlXF9GfwDZAeatjm6kXUW9W1olT4TuSsBMtHwRlg2cHevRvJzl8ZB1LtKebYi1500JyZBlIZBC8Eby9dTBAsw6nhoArSZAyp8eMqkf39nwNCJpAAS7f6uZB2355YPUtt4l8EjPXm2RsQSJ2NsXYHaFcoDaWj5Ou7GZC8lWSZBlUsZBZAoHkAACScULGk1npxXuZCMdCnKZBFgjA9FEZCZAiNjitGJUjDHVLdBRTkJhXV72hxG6ijQnRPTvJf0aS8TxTZCGt8ZAQXgMMQZDZD',
@@ -72,9 +80,11 @@ app.post('/api/config', (req, res) => {
     res.send({ status: 'ok' });
 });
 
+// RUTA ACTUALIZADA PARA GUARDAR VARIOS FLUJOS
 app.post('/api/flow', (req, res) => {
-    botFlow = req.body.flow;
-    console.log('Flujo actualizado');
+    // Ahora recibimos un objeto con claves (ej: { "hola": [...], "precio": [...] })
+    botFlows = req.body.flows; 
+    console.log('Flujos condicionales actualizados');
     res.send({ status: 'ok' });
 });
 
@@ -133,9 +143,30 @@ app.post('/webhook', async (req, res) => {
 
 // --- LÓGICA DEL BOT ---
 
-async function runBotLogic(phone) {
+// LÓGICA INTELIGENTE DE DETECCIÓN DE PALABRAS CLAVE
+async function runBotLogic(phone, text) {
+    // Convertir mensaje a minúsculas para facilitar la comparación
+    const userMsg = text.toLowerCase();
+    
+    // Por defecto, usamos el flujo "default"
+    let selectedFlow = botFlows['default'];
+
+    // Buscar si alguna palabra clave está en el mensaje
+    for (const key in botFlows) {
+        if (key !== 'default' && userMsg.includes(key)) {
+            selectedFlow = botFlows[key];
+            console.log(`Palabra clave "${key}" detectada. Ejecutando flujo.`);
+            break; // Paramos en la primera coincidencia
+        }
+    }
+
+    // Si no hay flujo seleccionado o el array está vacío, no hacer nada
+    if (!selectedFlow || selectedFlow.length === 0) return;
+
     await new Promise(r => setTimeout(r, 500));
-    for (const step of botFlow) {
+
+    // Ejecutar el flujo seleccionado
+    for (const step of selectedFlow) {
         if (step.type === 'delay') await new Promise(r => setTimeout(r, step.content * 1000));
         else if (step.type === 'reply') {
             await sendWhatsAppMessage(phone, step.content);
